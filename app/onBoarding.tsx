@@ -149,15 +149,19 @@ const onBoarding = () => {
                     })}
                 </View>
                 
-                {/* Text : Number of genres selected */}
-                <Text style={{color: "white", textAlign: "center", marginTop: 16, marginBottom: 8}}>
-                    0/3 genres selectionnés
-                </Text>
+                <View>
+                    {/* Text : Number of genres selected */}
+                    <Text style={{color: "white", textAlign: "center", marginTop: 16, marginBottom: 8}}>
+                        0/3 genres selectionnés
+                    </Text>
 
-                {/* Button : Continue */}
-                <Pressable>
-                    <Text style={{color: "white", textAlign: "center"}}>Continuer</Text>
-                </Pressable>
+                    {/* Button : Continue */}
+                    
+                    <Pressable>
+                        <Text style={{color: "white", textAlign: "center", backgroundColor:"red"}}>Continuer</Text>
+                    </Pressable>
+                </View>
+                
             </View>
         </ScrollView> 
     )
@@ -180,8 +184,8 @@ const styles = StyleSheet.create({
         aspectRatio: 1.2,
         borderRadius: 24, // "rounded-2xl"
         
-        // Positionnement
-        position: 'relative', 
+        // Positionnement 
+        position: 'relative',
         overflow: 'hidden', // "overflow-hidden"
         margin: 6,
         // PAS DE backgroundColor ICI
@@ -189,8 +193,7 @@ const styles = StyleSheet.create({
     gradientFill: {
         // Style pour que le dégradé remplisse la carte
         flex: 1,
-        padding: 16,
-        justifyContent: 'flex-end', // Aligne le contenu en bas
+        padding: 16,// Aligne le contenu en bas
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
@@ -201,7 +204,6 @@ const styles = StyleSheet.create({
         opacity: 0.4,
     },
     cardContent: {
-        // Reste au-dessus de l'overlay car déclaré après
     },
     cardIcon: {
         width: 32,
