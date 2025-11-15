@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolateColor } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import "./global.css"
 
 // --- Configuration de l'API ---
@@ -14,116 +14,39 @@ interface Genre {
 }
 
 // Colors for each genre
-const genreColors = {
-    28: '#E53935',    // Action (Rouge vif)
-    12: '#00897B',    // Aventure (Vert/Bleu)
-    16: '#1E88E5',    // Animation (Bleu vif)
-    35: '#FBC02D',    // Comédie (Jaune/Or)
-    80: '#455A64',    // Crime (Gris-bleu foncé)
-    99: '#6D4C41',    // Documentaire (Marron terre)
-    18: '#5E35B1',    // Drame (Violet profond)
-    10751: '#EC407A', // Familial (Rose)
-    14: '#8E24AA',    // Fantastique (Violet magique)
-    36: '#A1887F',    // Histoire (Sépia)
-    27: '#B71C1C',    // Horreur (Rouge sang)
-    10402: '#D81B60', // Musique (Magenta)
-    9648: '#004D40',  // Mystère (Vert forêt sombre)
-    10749: '#C2185B', // Romance (Rose foncé)
-    878: '#546E7A',  // Science-Fiction (Gris "métal")
-    10770: '#757575', // Téléfilm (Gris neutre)
-    53: '#37474F',    // Thriller (Gris très sombre)
-    10752: '#556B2F', // Guerre (Vert olive)
-    37: '#8D6E63',    // Western (Brun "poussière")
+// Les couleurs de DÉPART sont les vôtres, les couleurs d'ARRIVÉE sont une version plus foncée.
+const genreGradients: { [key: number]: string[] } = {
+    28: ['#E53935', '#C62828'], // Action (Rouge)
+    12: ['#00897B', '#00695C'], // Aventure (Vert/Bleu)
+    16: ['#1E88E5', '#1565C0'], // Animation (Bleu vif)
+    35: ['#FBC02D', '#F9A825'], // Comédie (Jaune/Or)
+    80: ['#455A64', '#263238'], // Crime (Gris-bleu foncé)
+    99: ['#6D4C41', '#4E342E'], // Documentaire (Marron terre)
+    18: ['#5E35B1', '#4527A0'], // Drame (Violet profond)
+    10751: ['#EC407A', '#D81B60'], // Familial (Rose)
+    14: ['#8E24AA', '#6A1B9A'], // Fantastique (Violet magique)
+    36: ['#A1887F', '#795548'], // Histoire (Sépia)
+    27: ['#B71C1C', '#8A0000'], // Horreur (Rouge sang)
+    10402: ['#D81B60', '#AD1457'], // Musique (Magenta)
+    9648: ['#004D40', '#00251A'], // Mystère (Vert forêt sombre)
+    10749: ['#C2185B', '#A00037'], // Romance (Rose foncé)
+    878: ['#546E7A', '#37474F'], // Science-Fiction (Gris "métal")
+    10770: ['#757575', '#424242'], // Téléfilm (Gris neutre)
+    53: ['#37474F', '#102027'], // Thriller (Gris très sombre)
+    10752: ['#556B2F', '#333F1D'], // Guerre (Vert olive)
+    37: ['#8D6E63', '#6D4C41'], // Western (Brun "poussière")
 };
 
-// Default color for genres not found in genreColors
-const defaultColor = '#9E9E9E'; // Grey
+// Dégradé par défaut pour les genres non trouvés
+const defaultGradient = ['#9E9E9E', '#616161']; // Gris
 
-// Fonction pour assombrir une couleur hex
-const darkenColor = (color: string, percent: number) => {
-    const num = parseInt(color.replace("#", ""), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.max(0, Math.min(255, (num >> 16) - amt));
-    const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) - amt));
-    const B = Math.max(0, Math.min(255, (num & 0x0000FF) - amt));
-    return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
-};
 
-// Composant GenreButton avec animation
-const GenreButton = ({ 
-    genre, 
-    backgroundColorGenre, 
-    isSelected, 
-    onPress 
-}: { 
-    genre: Genre; 
-    backgroundColorGenre: string; 
-    isSelected: boolean; 
-    onPress: () => void;
-}) => {
-    const [isPressed, setIsPressed] = useState(false);
-    const progress = useSharedValue(isSelected ? 1 : 0);
-    const darkColor = darkenColor(backgroundColorGenre, 20);
-
-    // Ne déclencher l'animation que si le bouton n'est pas pressé
-    useEffect(() => {
-        if (!isPressed) {
-            progress.value = withTiming(isSelected ? 1 : 0, {
-                duration: 300,
-            });
-        }
-    }, [isSelected, isPressed]);
-
-    const animatedStyle = useAnimatedStyle(() => {
-        const backgroundColor = interpolateColor(
-            progress.value,
-            [0, 1],
-            [backgroundColorGenre, darkColor]
-        );
-        return {
-            backgroundColor,
-        };
-    });
-
-    return (
-        <Pressable 
-            onPress={onPress} 
-            onPressIn={() => setIsPressed(true)}
-            onPressOut={() => {
-                setIsPressed(false);
-                // Déclencher l'animation après le relâchement
-                progress.value = withTiming(isSelected ? 1 : 0, {
-                    duration: 300,
-                });
-            }}
-            style={styles.genrePressable}
-        >
-            {({ pressed }) => (
-                <Animated.View style={[
-                    styles.genreButton,
-                    animatedStyle,
-                    pressed && { backgroundColor: darkColor }
-                ]}>
-                    {/* Logo : Movie */}
-                    <Image 
-                        source={{ uri: "https://img.icons8.com/sf-black/64/movie.png" }}
-                        style={{ width: 32, height: 32, marginBottom: 8, tintColor: 'white' }}
-                    />
-
-                    {/* Text: Genre Name */}
-                    <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
-                        {genre.name}
-                    </Text>
-                </Animated.View>
-            )}
-        </Pressable>
-    );
-};
 
 const onBoarding = () => {
 
     const [genre, setGenre] = useState<Genre[]>([]);
-    const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+
+    const [selectedGenres, setSelectedGenres] = useState(new Set<number>());
 
     useEffect(()=>{
         //fetch les différents genres
@@ -146,17 +69,18 @@ const onBoarding = () => {
         }
     }
 
-    const toggleGenre = (genreId: number) => {
-        setSelectedGenres(prev => {
-            if (prev.includes(genreId)) {
-                // Si déjà sélectionné, on le retire
-                return prev.filter(id => id !== genreId);
+    function handleSelectGenre(id: number): void {
+        setSelectedGenres((prevSelectedGenres) => {
+            const newSelectedGenres = new Set(prevSelectedGenres);
+            if (newSelectedGenres.has(id)) {
+                newSelectedGenres.delete(id);
             } else {
-                // Sinon, on l'ajoute
-                return [...prev, genreId];
+                newSelectedGenres.add(id);
             }
+            return newSelectedGenres;
         });
     }
+
     
     return (
         <ScrollView style={{backgroundColor:"#0f0f1e", flex: 1}}>
@@ -171,29 +95,63 @@ const onBoarding = () => {
                     Selectionnez au moins 3 genres pour personnaliser vos recommandations
                 </Text>
 
-                {/* Button : Genre */}
-                <View style={styles.genreContainer}>
-                    {genre.length > 0 ? genre.map((genre) => {
-                        const backgroundColorGenre = genreColors[genre.id as keyof typeof genreColors] || defaultColor;
-                        const isSelected = selectedGenres.includes(genre.id);
+                <View style={styles.genreGrid}>
+                    {genre.map((genre) => {
+                        const isSelected = selectedGenres.has(genre.id);
                         
-                        return (
-                            <GenreButton
-                                key={genre.id}
-                                genre={genre}
-                                backgroundColorGenre={backgroundColorGenre}
-                                isSelected={isSelected}
-                                onPress={() => toggleGenre(genre.id)}
-                            />
-                        );
-                    }) : (
-                        <Text style={{ color: 'white', textAlign: 'center', width: '100%' }}>Chargement des genres...</Text>
-                    )}
-                </View>
+                        // On récupère le TABLEAU de dégradé, ou le dégradé par défaut
+                        const gradient = genreGradients[genre.id] || defaultGradient;
+                        
+                        // On garde la couleur de base (plus claire) pour l'icône "check"
+                        const checkIconColor = gradient[0];
 
+                        return (
+                            <Pressable
+                                key={genre.id}
+                                // Le style de la carte n'a PLUS de 'backgroundColor'
+                                style={styles.genreCard} 
+                                onPress={() => handleSelectGenre(genre.id)}
+                            >
+                                {/* On enveloppe TOUT le contenu dans le LinearGradient.
+                                Il gère le dégradé 'to-br' (vers le bas à droite).
+                                */}
+                                <LinearGradient
+                                    colors={gradient as [string, string]}
+                                    start={{ x: 0, y: 0 }} // coin 'top-left'
+                                    end={{ x: 1, y: 1 }}   // coin 'bottom-right'
+                                    style={styles.gradientFill} // Style pour remplir la carte
+                                >
+                                    {/* Overlay (visible si 'isSelected' est true) */}
+                                    <View style={[styles.overlay, isSelected && styles.overlayVisible]} />
+
+                                    {/* Contenu (z-index est géré par l'ordre) */}
+                                    <View style={styles.cardContent}>
+                                        <Image
+                                            source={{ uri: "https://img.icons8.com/sf-black/64/movie.png" }}
+                                            style={styles.cardIcon}
+                                        />
+                                        <Text style={styles.cardText}>{genre.name}</Text>
+                                    </View>
+
+                                    {/* Icône Check (visible si 'isSelected' est true) */}
+                                    {/* On utilise {isSelected && ...} pour un rendu conditionnel propre */}
+                                    {isSelected && (
+                                        <View style={styles.checkIcon}>
+                                            <Text style={[styles.checkMark, { color: checkIconColor }]}>
+                                                ✓
+                                            </Text>
+                                        </View>
+                                    )}
+                                    
+                                </LinearGradient>
+                            </Pressable>
+                        )
+                    })}
+                </View>
+                
                 {/* Text : Number of genres selected */}
                 <Text style={{color: "white", textAlign: "center", marginTop: 16, marginBottom: 8}}>
-                    {selectedGenres.length}/3 genres selectionnés
+                    0/3 genres selectionnés
                 </Text>
 
                 {/* Button : Continue */}
@@ -208,22 +166,72 @@ const onBoarding = () => {
 export default onBoarding
 
 const styles = StyleSheet.create({
-    genreContainer: {
+
+    genreGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        gap: 10,
+        justifyContent: 'center',
+        gap: 12,
+        marginHorizontal: -6, // Compense le margin des cartes
     },
-    genrePressable: {
-        width: '48%',
-        marginBottom: 12,
+    genreCard: {
+        // Dimensions et espacement
+        width: '45%',
+        aspectRatio: 1.2,
+        borderRadius: 24, // "rounded-2xl"
+        
+        // Positionnement
+        position: 'relative', 
+        overflow: 'hidden', // "overflow-hidden"
+        margin: 6,
+        // PAS DE backgroundColor ICI
     },
-    genreButton: {
+    gradientFill: {
+        // Style pour que le dégradé remplisse la carte
+        flex: 1,
         padding: 16,
-        borderRadius: 16,
-        height: 120,
-        width: '100%',
+        justifyContent: 'flex-end', // Aligne le contenu en bas
     },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: '#000000',
+        opacity: 0,
+    },
+    overlayVisible: {
+        opacity: 0.4,
+    },
+    cardContent: {
+        // Reste au-dessus de l'overlay car déclaré après
+    },
+    cardIcon: {
+        width: 32,
+        height: 32,
+        marginBottom: 8,
+        tintColor: 'white',
+    },
+    cardText: {
+        color: "white",
+        fontWeight: '600',
+        fontSize: 18,
+    },
+    checkIcon: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        width: 24,
+        height: 24,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        // 'display' est géré par le rendu conditionnel {isSelected && ...}
+    },
+    checkMark: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        // la couleur est appliquée dynamiquement
+    }
+    
 })
 
 
