@@ -1,9 +1,16 @@
-import { View, Text } from 'react-native';
+import { StyleSheet, Text, View} from "react-native";
+import { Link } from "expo-router";
 
-export default function HomeScreen() {
+const DexiaHome = () => {
   return (
-    <View className="flex-1 items-center justify-center bg-red-500">
-      <Text className="text-4xl text-white">Test NativeWind</Text>
-    </View>
-  );
+    <View>
+        <Text>DexiaHome</Text>
+        <Link href="/onBoarding">
+          <Text>Go to Onboarding</Text>
+        </Link>
+    </View>  
+  )
 }
+
+export default DexiaHome
+const styles = StyleSheet.create({})
