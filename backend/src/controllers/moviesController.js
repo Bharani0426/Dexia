@@ -1,4 +1,4 @@
-const db = require('../models/database');
+const db = require('../models/movies');
 
 exports.getMoviesByGenre = (req, res) => {
     const genreId = req.params.genreId;
