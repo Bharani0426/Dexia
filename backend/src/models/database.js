@@ -12,6 +12,8 @@ module.exports = {
     findMoviesByKeyword
 }
 
+//dans beaucoup de ces fonctions, on utilise des callbacks pour gérer l'asynchronicité des requêtes SQL, alors on doit les uitliser diféremment dans les fichiers qui les appellent.
+
 function getMoviesByGenre(genreId, callback, limit = null) {
     let sql = 'SELECT movies.* FROM movies JOIN movie_genres ON movies.id = movie_genres.movie_id WHERE movie_genres.genre_id = ?';
     if (limit) {
