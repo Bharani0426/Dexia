@@ -24,3 +24,23 @@ function getUserPreferences(userId, callback, limit = null) {
         });
     }
 }
+
+function isOnboardingDone(userId, callback) {
+    db.get('SELECT onboarding_done FROM users WHERE id = ?', [userId], (err, row) => {
+        if (err) {
+            console.error(err.message);
+            return callback(false);
+        }
+        callback(row ? row.onboarding_done === 1 : false);
+    });
+}
+
+function setOnboardingDone(userId, done, callback) {
+    db.run('UPDATE users SET onboarding_done = ? WHERE id = ?', [done ? 1 : 0, userId], function(err) {
+        if (err) {
+            console.error(err.message);
+            return callback(false);
+        }
+        callback(true);
+    });
+}
