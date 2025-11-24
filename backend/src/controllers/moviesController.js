@@ -28,3 +28,31 @@ exports.getTopRatedMovies = (req, res) => {
         res.json(movies);
     });
 };
+
+exports.getAllGenres = (req, res) => {
+    db.getAllGenres((genres) => {
+        res.json(genres);
+    });
+};
+
+exports.getGenreIdByName = (req, res) => {
+    const name = req.params.name;
+    db.getGenreIdByName(name, (id) => {
+        if (id === null) return res.status(404).json({ error: 'Genre non trouvé' });
+        res.json({ id });
+    });
+};
+
+exports.getMovieGenreById = (req, res) => {
+    const movieId = req.params.id;
+    db.getMovieGenreById(movieId, (genres) => {
+        res.json(genres);
+    });
+};
+
+exports.getMovieGenreIdById = (req, res) => {
+    const movieId = req.params.id;
+    db.getMovieGenreIdById(movieId, (genreIds) => {
+        res.json(genreIds);
+    });
+};
